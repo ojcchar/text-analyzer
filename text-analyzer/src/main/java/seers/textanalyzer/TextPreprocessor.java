@@ -127,11 +127,15 @@ public class TextPreprocessor {
 	public static List<String> removePunctuation(List<String> tokens) {
 		List<String> validTokens = new ArrayList<>();
 		for (String token : tokens) {
-			if (!token.matches("[\\p{P}\\p{S}]") && !isParenthesis(token)) {
+			if (!isPunctuation(token)) {
 				validTokens.add(token);
 			}
 		}
 		return validTokens;
+	}
+
+	private static boolean isPunctuation(String token) {
+		return token.matches("[\\p{P}\\p{S}]") || isParenthesis(token);
 	}
 
 	private static boolean isParenthesis(String token) {
