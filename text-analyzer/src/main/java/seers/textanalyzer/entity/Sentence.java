@@ -9,8 +9,19 @@ public class Sentence {
 	private List<Token> tokens;
 
 	public Sentence(String id) {
+		if (id == null) {
+			throw new NullPointerException();
+		}
 		this.id = id;
 		tokens = new ArrayList<>();
+	}
+
+	public Sentence(String id, List<Token> tokens) {
+		this(id);
+		if (tokens == null) {
+			throw new NullPointerException();
+		}
+		this.tokens = tokens;
 	}
 
 	public void addToken(Token token) {

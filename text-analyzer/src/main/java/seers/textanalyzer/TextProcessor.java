@@ -3,7 +3,11 @@ package seers.textanalyzer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -133,16 +137,59 @@ public class TextProcessor {
 		return false;
 	}
 
-	public static String getBagOfWords(List<Sentence> sentences) {
+	public static String getStringFromSentences(List<Sentence> sentences) {
 		StringBuffer buffer = new StringBuffer();
 		for (Sentence sentence : sentences) {
 			List<Token> tokens = sentence.getTokens();
 			for (Token token : tokens) {
-
 				buffer.append(token.getLemma());
 				buffer.append(SPACE);
 			}
 		}
-		return buffer.toString();
+		return buffer.toString().trim();
 	}
+
+	public static List<Token> getAllTokens(List<Sentence> sentences) {
+		List<Token> tokens = new ArrayList<>();
+		for (Sentence sentence : sentences) {
+			tokens.addAll(sentence.getTokens());
+		}
+		return tokens;
+	}
+
+	public static List<Token> getUniqueTokensBy(List<Sentence> sentences, Function<Token, Object> fieldFn) {
+
+		List<Token> tokens = TextProcessor.getAllTokens(sentences);
+		// unique terms by lemma
+		List<Token> uniqueTokens = getUniqueTokensBy(fieldFn, tokens);
+
+		return uniqueTokens;
+	}
+
+	private static List<Token> getUniqueTokensBy(Function<Token, Object> fieldFn, List<Token> tokens) {
+		List<Token> uniqueTokens = new ArrayList<>();
+		tokens.stream().filter(distinctByField(fieldFn)).forEach(t -> {
+			uniqueTokens.add(t);
+		});
+		return uniqueTokens;
+	}
+
+	private static <T> Predicate<T> distinctByField(Function<? super T, Object> fieldExtractor) {
+		Map<Object, Boolean> elemsSeen = new ConcurrentHashMap<>();
+		return t -> elemsSeen.putIfAbsent(fieldExtractor.apply(t), Boolean.TRUE) == null;
+	}
+
+	public static List<Sentence> getSentencesWithUniqueTerms(List<Sentence> sentences,
+			Function<Token, Object> fieldFn) {
+
+		List<Sentence> uniqueSentences = new ArrayList<>();
+		sentences.stream().forEach(s -> {
+			List<Token> unTkns = getUniqueTokensBy(fieldFn, s.getTokens());
+			uniqueSentences.add(new Sentence(s.getId(), unTkns));
+		});
+
+		return uniqueSentences;
+
+	}
+
 }
