@@ -28,6 +28,7 @@ public class TextProcessor {
 	static {
 		Properties props = new Properties();
 		props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
+		props.setProperty("tokenize.options", "untokenizable=noneKeep");
 		pipeline = new StanfordCoreNLP(props);
 	}
 
