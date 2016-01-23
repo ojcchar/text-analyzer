@@ -28,6 +28,7 @@ public class TextProcessor {
 	}
 
 	private static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
+	private static final String SPACE = " ";
 	private static HashMap<String, String> POS_TAGS = new HashMap<String, String>();
 
 	static {
@@ -130,5 +131,18 @@ public class TextProcessor {
 			}
 		}
 		return false;
+	}
+
+	public static String getBagOfWords(List<Sentence> sentences) {
+		StringBuffer buffer = new StringBuffer();
+		for (Sentence sentence : sentences) {
+			List<Token> tokens = sentence.getTokens();
+			for (Token token : tokens) {
+
+				buffer.append(token.getLemma());
+				buffer.append(SPACE);
+			}
+		}
+		return buffer.toString();
 	}
 }
