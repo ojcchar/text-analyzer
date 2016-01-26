@@ -91,17 +91,21 @@ public class TextProcessor {
 
 			for (CoreLabel token : list) {
 				String word = token.get(TextAnnotation.class);
+				String lemma = token.get(LemmaAnnotation.class);
+				String pos = token.get(PartOfSpeechAnnotation.class);
 
-				if (isPunctuation(word)) {
+				if (isPunctuation(lemma)) {
 					continue;
 				}
 
-				// if (isInteger(word)) {
-				// continue;
-				// }
+				if (isInteger(lemma)) {
+					continue;
+				}
 
-				String lemma = token.get(LemmaAnnotation.class);
-				String pos = token.get(PartOfSpeechAnnotation.class);
+				if (containsSpecialChars(lemma, pos)) {
+					continue;
+				}
+
 				String generalPos = getGeneralPos(pos);
 				String stem = GeneralStemmer.stemmingPorter(word);
 
@@ -121,6 +125,62 @@ public class TextProcessor {
 
 	}
 
+	private static boolean containsSpecialChars(String str, String pos) {
+
+		if (pos.equalsIgnoreCase("sym")) {
+			return true;
+		}
+
+		if ("'s".equalsIgnoreCase(str)) {
+			return false;
+		}
+
+		if ("'ll".equalsIgnoreCase(str)) {
+			return false;
+		}
+
+		String[] split = str.split("/");
+		if (split.length > 1) {
+
+			for (String s : split) {
+				if (checkSpecialChars(s)) {
+					return true;
+				}
+			}
+
+			if (pos.equalsIgnoreCase("cd")) {
+				return true;
+			}
+
+			return false;
+		}
+
+		split = str.split("-");
+		if (split.length > 1) {
+
+			for (String s : split) {
+				if (checkSpecialChars(s)) {
+					return true;
+				}
+			}
+
+			if (pos.equalsIgnoreCase("cd")) {
+				return true;
+			}
+
+			return false;
+		}
+
+		boolean b = checkSpecialChars(str);
+		return b;
+	}
+
+	private static boolean checkSpecialChars(String str) {
+		String[] split = str.split("[^a-zA-Z0-9]");
+		boolean b = split.length != 1;
+		return b;
+	}
+
 	private static boolean isInteger(String token) {
 		return token.matches("\\d+");
 	}
@@ -131,7 +191,7 @@ public class TextProcessor {
 
 	private static boolean isParenthesis(String token) {
 		for (String parenthesis : PARENTHESIS) {
-			if (token.contains(parenthesis)) {
+			if (token.toLowerCase().contains(parenthesis.toLowerCase())) {
 				return true;
 			}
 		}
