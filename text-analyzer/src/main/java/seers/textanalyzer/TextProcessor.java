@@ -91,7 +91,7 @@ public class TextProcessor {
 
 			for (CoreLabel token : list) {
 				String word = token.get(TextAnnotation.class);
-				String lemma = token.get(LemmaAnnotation.class);
+				String lemma = token.get(LemmaAnnotation.class).toLowerCase();
 				String pos = token.get(PartOfSpeechAnnotation.class);
 
 				if (isPunctuation(lemma)) {
@@ -107,7 +107,7 @@ public class TextProcessor {
 				}
 
 				String generalPos = getGeneralPos(pos);
-				String stem = GeneralStemmer.stemmingPorter(word);
+				String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
 
 				Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
 				parsedSentence.addToken(parsedToken);
