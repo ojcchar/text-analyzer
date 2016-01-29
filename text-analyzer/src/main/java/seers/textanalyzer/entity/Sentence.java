@@ -73,4 +73,9 @@ public class Sentence {
 		return tokens.isEmpty();
 	}
 
+	@Override
+	public String toString() {
+		return "s [id=" + id + ", tk=" + tokens + "]";
+	}
+
 }

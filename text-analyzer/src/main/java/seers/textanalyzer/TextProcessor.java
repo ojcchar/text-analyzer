@@ -1,5 +1,7 @@
 package seers.textanalyzer;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import org.apache.commons.io.FileUtils;
 
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -75,7 +79,7 @@ public class TextProcessor {
 		return pos;
 	}
 
-	public static List<Sentence> processText(String text) {
+	public static List<Sentence> processText(String text, List<String> stopWords) {
 
 		Annotation document = new Annotation(text);
 		pipeline.annotate(document);
@@ -98,11 +102,15 @@ public class TextProcessor {
 					continue;
 				}
 
-				if (isInteger(lemma)) {
+				// if (isInteger(lemma)) {
+				// continue;
+				// }
+
+				if (containsSpecialChars(lemma, pos)) {
 					continue;
 				}
 
-				if (containsSpecialChars(lemma, pos)) {
+				if (stopWords != null && stopWords.size() > 0 && isStopWord(stopWords, lemma, pos)) {
 					continue;
 				}
 
@@ -123,6 +131,10 @@ public class TextProcessor {
 
 		return parsedSentences;
 
+	}
+
+	private static boolean isStopWord(List<String> stopWords, String lemma, String pos) {
+		return stopWords.contains(lemma);
 	}
 
 	private static boolean containsSpecialChars(String str, String pos) {
@@ -251,6 +263,15 @@ public class TextProcessor {
 
 		return uniqueSentences;
 
+	}
+
+	public static List<String> readStopWords(String stopWordsPath) throws IOException {
+		List<String> lines = FileUtils.readLines(new File(stopWordsPath));
+		List<String> stopWords = new ArrayList<>();
+		for (String line : lines) {
+			stopWords.add(line.trim().toLowerCase());
+		}
+		return stopWords;
 	}
 
 }
