@@ -102,9 +102,16 @@ public class TextProcessor {
 					continue;
 				}
 
+				if (matchesPOS(pos, "LS")) {
+					continue;
+				}
+
 				// if (isInteger(lemma)) {
 				// continue;
 				// }
+				if (isShortTerm(lemma, pos, 2)) {
+					continue;
+				}
 
 				if (containsSpecialChars(lemma, pos)) {
 					continue;
@@ -133,13 +140,24 @@ public class TextProcessor {
 
 	}
 
+	private static boolean isShortTerm(String lemma, String pos, int length) {
+		if (matchesPOS(pos, "cd")) {
+			return false;
+		}
+		return (lemma.length() <= length);
+	}
+
+	private static boolean matchesPOS(String pos, String posToMatch) {
+		return posToMatch.equalsIgnoreCase(pos);
+	}
+
 	private static boolean isStopWord(List<String> stopWords, String lemma, String pos) {
 		return stopWords.contains(lemma);
 	}
 
 	private static boolean containsSpecialChars(String str, String pos) {
 
-		if (pos.equalsIgnoreCase("sym")) {
+		if (matchesPOS(pos, "sym")) {
 			return true;
 		}
 
