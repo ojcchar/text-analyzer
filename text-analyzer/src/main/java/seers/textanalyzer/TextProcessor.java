@@ -79,6 +79,40 @@ public class TextProcessor {
 		return pos;
 	}
 
+	public static List<Sentence> processText(String text) {
+
+		Annotation document = new Annotation(text);
+		pipeline.annotate(document);
+		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+
+		List<Sentence> parsedSentences = new ArrayList<>();
+		Integer id = 0;
+
+		for (CoreMap sentence : sentences) {
+			Sentence parsedSentence = new Sentence(id.toString());
+
+			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
+
+			for (CoreLabel token : list) {
+				String word = token.get(TextAnnotation.class);
+				String lemma = token.get(LemmaAnnotation.class).toLowerCase();
+				String pos = token.get(PartOfSpeechAnnotation.class);
+
+				String generalPos = getGeneralPos(pos);
+				String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
+
+				Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
+				parsedSentence.addToken(parsedToken);
+			}
+
+			parsedSentences.add(parsedSentence);
+			id++;
+		}
+
+		return parsedSentences;
+
+	}
+
 	public static List<Sentence> processText(String text, List<String> stopWords) {
 
 		Annotation document = new Annotation(text);
@@ -290,6 +324,16 @@ public class TextProcessor {
 			stopWords.add(line.trim().toLowerCase());
 		}
 		return stopWords;
+	}
+
+	public static String getStringFromSentence(Sentence sentence) {
+		StringBuffer buffer = new StringBuffer();
+		List<Token> tokens = sentence.getTokens();
+		for (Token token : tokens) {
+			buffer.append(token.getLemma());
+			buffer.append(SPACE);
+		}
+		return buffer.toString().trim();
 	}
 
 }
