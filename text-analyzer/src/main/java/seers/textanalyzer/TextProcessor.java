@@ -21,19 +21,28 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
 
 public class TextProcessor {
 
-	private static StanfordCoreNLP pipeline;
+	private static StanfordCoreNLP defaultPipeline;
+	private static StanfordCoreNLP fullPipeline;
 
 	static {
+		// ---------------------------
 		Properties props = new Properties();
 		props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
 		props.setProperty("tokenize.options", "untokenizable=noneKeep");
-		pipeline = new StanfordCoreNLP(props);
+		defaultPipeline = new StanfordCoreNLP(props);
+		// ---------------------------
+		Properties props2 = new Properties();
+		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, parse");
+		props2.setProperty("tokenize.options", "untokenizable=noneKeep");
+		fullPipeline = new StanfordCoreNLP(props2);
 	}
 
 	private static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
@@ -82,7 +91,7 @@ public class TextProcessor {
 	public static List<Sentence> processText(String text) {
 
 		Annotation document = new Annotation(text);
-		pipeline.annotate(document);
+		defaultPipeline.annotate(document);
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
 
 		List<Sentence> parsedSentences = new ArrayList<>();
@@ -94,14 +103,7 @@ public class TextProcessor {
 			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
 
 			for (CoreLabel token : list) {
-				String word = token.get(TextAnnotation.class);
-				String lemma = token.get(LemmaAnnotation.class).toLowerCase();
-				String pos = token.get(PartOfSpeechAnnotation.class);
-
-				String generalPos = getGeneralPos(pos);
-				String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
-
-				Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
+				Token parsedToken = parseToken(token);
 				parsedSentence.addToken(parsedToken);
 			}
 
@@ -116,7 +118,7 @@ public class TextProcessor {
 	public static List<Sentence> processText(String text, List<String> stopWords) {
 
 		Annotation document = new Annotation(text);
-		pipeline.annotate(document);
+		defaultPipeline.annotate(document);
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
 
 		List<Sentence> parsedSentences = new ArrayList<>();
@@ -326,7 +328,7 @@ public class TextProcessor {
 		return stopWords;
 	}
 
-	public static String getStringFromSentence(Sentence sentence) {
+	public static String getStringFromLemmas(Sentence sentence) {
 		StringBuffer buffer = new StringBuffer();
 		List<Token> tokens = sentence.getTokens();
 		for (Token token : tokens) {
@@ -334,6 +336,56 @@ public class TextProcessor {
 			buffer.append(SPACE);
 		}
 		return buffer.toString().trim();
+	}
+
+	public static String getStringFromTerms(Sentence sentence) {
+		StringBuffer buffer = new StringBuffer();
+		List<Token> tokens = sentence.getTokens();
+		for (Token token : tokens) {
+			buffer.append(token.getWord());
+			buffer.append(SPACE);
+		}
+		return buffer.toString().trim();
+	}
+
+	public static List<Sentence> processTextFullPipeline(String text) {
+		Annotation document = new Annotation(text);
+		fullPipeline.annotate(document);
+		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+
+		List<Sentence> parsedSentences = new ArrayList<>();
+		Integer id = 0;
+
+		for (CoreMap sentence : sentences) {
+			Sentence parsedSentence = new Sentence(id.toString());
+
+			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
+
+			for (CoreLabel token : list) {
+				Token parsedToken = parseToken(token);
+				parsedSentence.addToken(parsedToken);
+			}
+
+			SemanticGraph dependencies = sentence.get(CollapsedCCProcessedDependenciesAnnotation.class);
+			parsedSentence.setDependencies(dependencies);
+
+			parsedSentences.add(parsedSentence);
+			id++;
+		}
+
+		return parsedSentences;
+	}
+
+	public static Token parseToken(CoreLabel token) {
+		String word = token.get(TextAnnotation.class);
+		String lemma = token.get(LemmaAnnotation.class).toLowerCase();
+		String pos = token.get(PartOfSpeechAnnotation.class);
+
+		String generalPos = getGeneralPos(pos);
+		String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
+
+		Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
+		return parsedToken;
 	}
 
 }

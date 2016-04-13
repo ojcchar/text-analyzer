@@ -3,10 +3,13 @@ package seers.textanalyzer.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.stanford.nlp.semgraph.SemanticGraph;
+
 public class Sentence {
 
 	private String id;
 	private List<Token> tokens;
+	private SemanticGraph dependencies;
 
 	public Sentence(String id) {
 		if (id == null) {
@@ -76,6 +79,14 @@ public class Sentence {
 	@Override
 	public String toString() {
 		return "s [id=" + id + ", tk=" + tokens + "]";
+	}
+
+	public SemanticGraph getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(SemanticGraph dependencies) {
+		this.dependencies = dependencies;
 	}
 
 }
