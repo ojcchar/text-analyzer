@@ -249,7 +249,7 @@ public class TextProcessor {
 		return token.matches("\\d+");
 	}
 
-	private static boolean isPunctuation(String token) {
+	public static boolean isPunctuation(String token) {
 		return token.matches("[\\p{P}\\p{S}]") || isParenthesis(token);
 	}
 
