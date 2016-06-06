@@ -45,7 +45,7 @@ public class TextProcessor {
 		fullPipeline = new StanfordCoreNLP(props2);
 	}
 
-	private static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
+	public static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
 	private static final String SPACE = " ";
 	private static HashMap<String, String> POS_TAGS = new HashMap<String, String>();
 
@@ -176,7 +176,7 @@ public class TextProcessor {
 
 	}
 
-	private static boolean isShortTerm(String lemma, String pos, int length) {
+	public static boolean isShortTerm(String lemma, String pos, int length) {
 		if (matchesPOS(pos, "cd")) {
 			return false;
 		}
@@ -187,11 +187,11 @@ public class TextProcessor {
 		return posToMatch.equalsIgnoreCase(pos);
 	}
 
-	private static boolean isStopWord(List<String> stopWords, String lemma, String pos) {
+	public static boolean isStopWord(List<String> stopWords, String lemma, String pos) {
 		return stopWords.contains(lemma);
 	}
 
-	private static boolean containsSpecialChars(String str, String pos) {
+	public static boolean containsSpecialChars(String str, String pos) {
 
 		if (matchesPOS(pos, "sym")) {
 			return true;
@@ -247,7 +247,7 @@ public class TextProcessor {
 		return b;
 	}
 
-	private static boolean isInteger(String token) {
+	public static boolean isInteger(String token) {
 		return token.matches("\\d+");
 	}
 

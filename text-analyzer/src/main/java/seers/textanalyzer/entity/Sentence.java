@@ -39,14 +39,6 @@ public class Sentence {
 		return tokens;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public void setTokens(List<Token> tokens) {
-		this.tokens = tokens;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
