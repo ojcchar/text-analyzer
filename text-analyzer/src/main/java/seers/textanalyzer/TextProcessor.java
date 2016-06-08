@@ -183,7 +183,7 @@ public class TextProcessor {
 		return (lemma.length() <= length);
 	}
 
-	private static boolean matchesPOS(String pos, String posToMatch) {
+	public static boolean matchesPOS(String pos, String posToMatch) {
 		return posToMatch.equalsIgnoreCase(pos);
 	}
 
@@ -241,7 +241,7 @@ public class TextProcessor {
 		return b;
 	}
 
-	private static boolean checkSpecialChars(String str) {
+	public static boolean checkSpecialChars(String str) {
 		String[] split = str.split("[^a-zA-Z0-9]");
 		boolean b = split.length != 1;
 		return b;
