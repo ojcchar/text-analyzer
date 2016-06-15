@@ -46,6 +46,7 @@ public class TextProcessor {
 	}
 
 	public static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
+	public static final String[] PARENTHESIS2 = { "LCB", "RCB", "LRB", "RRB", "LSB", "RSB" };
 	private static final String SPACE = " ";
 	private static HashMap<String, String> POS_TAGS = new HashMap<String, String>();
 
@@ -258,6 +259,12 @@ public class TextProcessor {
 	private static boolean isParenthesis(String token) {
 		for (String parenthesis : PARENTHESIS) {
 			if (token.toLowerCase().contains(parenthesis.toLowerCase())) {
+				return true;
+			}
+		}
+
+		for (String parenthesis : PARENTHESIS2) {
+			if (token.toLowerCase().equals(parenthesis.toLowerCase())) {
 				return true;
 			}
 		}
