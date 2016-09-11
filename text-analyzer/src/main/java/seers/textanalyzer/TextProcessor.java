@@ -387,6 +387,9 @@ public class TextProcessor {
 		String word = token.get(TextAnnotation.class);
 		String lemma = token.get(LemmaAnnotation.class).toLowerCase();
 		String pos = token.get(PartOfSpeechAnnotation.class);
+		if ((word.contains(".") || (word.contains("(") && word.contains(")"))) && word.length() > 1) {
+			pos = "NN";
+		}
 
 		String generalPos = getGeneralPos(pos);
 		String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
