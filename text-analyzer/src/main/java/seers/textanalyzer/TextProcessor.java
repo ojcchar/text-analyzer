@@ -27,6 +27,10 @@ import edu.stanford.nlp.util.CoreMap;
 import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
 
+/**
+ * @author ojcch
+ *
+ */
 public class TextProcessor {
 
 	private static StanfordCoreNLP defaultPipeline;
@@ -89,7 +93,20 @@ public class TextProcessor {
 		return pos;
 	}
 
+	/**
+	 * This method does not check for identifies (i.e., identifiers maybe not be
+	 * parsed as NN).
+	 * 
+	 * Method created for compatibility reasons.
+	 * 
+	 * @param text
+	 * @return
+	 */
 	public static List<Sentence> processText(String text) {
+		return processText(text, false);
+	}
+
+	public static List<Sentence> processText(String text, boolean checkForIdentifiers) {
 
 		Annotation document = new Annotation(text);
 		defaultPipeline.annotate(document);
@@ -104,7 +121,7 @@ public class TextProcessor {
 			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
 
 			for (CoreLabel token : list) {
-				Token parsedToken = parseToken(token);
+				Token parsedToken = parseToken(token, checkForIdentifiers);
 				parsedSentence.addToken(parsedToken);
 			}
 
@@ -369,7 +386,7 @@ public class TextProcessor {
 			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
 
 			for (CoreLabel token : list) {
-				Token parsedToken = parseToken(token);
+				Token parsedToken = parseToken(token, false);
 				parsedSentence.addToken(parsedToken);
 			}
 
@@ -383,12 +400,16 @@ public class TextProcessor {
 		return parsedSentences;
 	}
 
-	public static Token parseToken(CoreLabel token) {
+	public static Token parseToken(CoreLabel token, boolean checkForIdentifiers) {
 		String word = token.get(TextAnnotation.class);
 		String lemma = token.get(LemmaAnnotation.class).toLowerCase();
 		String pos = token.get(PartOfSpeechAnnotation.class);
-		if ((word.contains(".") || (word.contains("(") && word.contains(")"))) && word.length() > 1) {
-			pos = "NN";
+		if (checkForIdentifiers) {
+			// match identifiers like "org.Class"
+			// match method calls such as "call(param1)"
+			if ((word.contains(".") || (word.contains("(") && word.contains(")"))) && word.length() > 1) {
+				pos = "NN";
+			}
 		}
 
 		String generalPos = getGeneralPos(pos);
