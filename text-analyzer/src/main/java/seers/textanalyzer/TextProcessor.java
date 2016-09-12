@@ -40,12 +40,12 @@ public class TextProcessor {
 		// ---------------------------
 		Properties props = new Properties();
 		props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
-		props.setProperty("tokenize.options", "untokenizable=noneKeep");
+		props.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		defaultPipeline = new StanfordCoreNLP(props);
 		// ---------------------------
 		Properties props2 = new Properties();
 		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, parse");
-		props2.setProperty("tokenize.options", "untokenizable=noneKeep");
+		props2.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		fullPipeline = new StanfordCoreNLP(props2);
 	}
 
@@ -110,18 +110,22 @@ public class TextProcessor {
 
 		Annotation document = new Annotation(text);
 		defaultPipeline.annotate(document);
+
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
 
 		List<Sentence> parsedSentences = new ArrayList<>();
 		Integer id = 0;
 
 		for (CoreMap sentence : sentences) {
-			Sentence parsedSentence = new Sentence(id.toString());
 
-			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
+			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			for (CoreLabel token : list) {
+			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
+
+			for (CoreLabel token : tokenList) {
 				Token parsedToken = parseToken(token, checkForIdentifiers);
+
 				parsedSentence.addToken(parsedToken);
 			}
 
@@ -143,11 +147,13 @@ public class TextProcessor {
 		Integer id = 0;
 
 		for (CoreMap sentence : sentences) {
-			Sentence parsedSentence = new Sentence(id.toString());
 
-			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
+			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			for (CoreLabel token : list) {
+			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
+
+			for (CoreLabel token : tokenList) {
 				String word = token.get(TextAnnotation.class);
 				String lemma = token.get(LemmaAnnotation.class).toLowerCase();
 				String pos = token.get(PartOfSpeechAnnotation.class);
@@ -336,7 +342,7 @@ public class TextProcessor {
 		List<Sentence> uniqueSentences = new ArrayList<>();
 		sentences.stream().forEach(s -> {
 			List<Token> unTkns = getUniqueTokensBy(fieldFn, s.getTokens());
-			uniqueSentences.add(new Sentence(s.getId(), unTkns));
+			uniqueSentences.add(new Sentence(s.getId(), unTkns, s.getText()));
 		});
 
 		return uniqueSentences;
@@ -381,11 +387,13 @@ public class TextProcessor {
 		Integer id = 0;
 
 		for (CoreMap sentence : sentences) {
-			Sentence parsedSentence = new Sentence(id.toString());
 
-			List<CoreLabel> list = sentence.get(TokensAnnotation.class);
+			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			for (CoreLabel token : list) {
+			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
+
+			for (CoreLabel token : tokenList) {
 				Token parsedToken = parseToken(token, false);
 				parsedSentence.addToken(parsedToken);
 			}

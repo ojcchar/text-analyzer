@@ -10,6 +10,7 @@ public class Sentence {
 	private String id;
 	private List<Token> tokens;
 	private SemanticGraph dependencies;
+	private String text;
 
 	public Sentence(String id) {
 		if (id == null) {
@@ -19,12 +20,22 @@ public class Sentence {
 		tokens = new ArrayList<>();
 	}
 
+	public Sentence(String id, String text) {
+		this(id);
+		this.text = text;
+	}
+
 	public Sentence(String id, List<Token> tokens) {
 		this(id);
 		if (tokens == null) {
 			throw new NullPointerException();
 		}
 		this.tokens = tokens;
+	}
+
+	public Sentence(String id, List<Token> tokens, String text) {
+		this(id, tokens);
+		this.text = text;
 	}
 
 	public void addToken(Token token) {
@@ -79,6 +90,10 @@ public class Sentence {
 
 	public void setDependencies(SemanticGraph dependencies) {
 		this.dependencies = dependencies;
+	}
+
+	public String getText() {
+		return text;
 	}
 
 }
