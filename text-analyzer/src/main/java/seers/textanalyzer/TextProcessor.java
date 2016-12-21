@@ -279,7 +279,7 @@ public class TextProcessor {
 		return token.matches("[\\p{P}\\p{S}]") || isParenthesis(token);
 	}
 
-	private static boolean isParenthesis(String token) {
+	public static boolean isParenthesis(String token) {
 		for (String parenthesis : PARENTHESIS) {
 			if (token.toLowerCase().contains(parenthesis.toLowerCase())) {
 				return true;
@@ -425,6 +425,34 @@ public class TextProcessor {
 
 		Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
 		return parsedToken;
+	}
+
+	public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase) {
+		StringBuffer buffer = new StringBuffer();
+		List<Token> tokens = sentence.getTokens();
+		for (Token token : tokens) {
+			if (lowercase) {
+				buffer.append(token.getWord().toLowerCase());
+			} else {
+				buffer.append(token.getWord());
+			}
+			buffer.append("$$");
+			buffer.append(token.getPos());
+			buffer.append(SPACE);
+		}
+		return buffer.toString().trim();
+	}
+
+	public static String getStringFromLemmasAndPos(Sentence sentence) {
+		StringBuffer buffer = new StringBuffer();
+		List<Token> tokens = sentence.getTokens();
+		for (Token token : tokens) {
+			buffer.append(token.getLemma());
+			buffer.append("$$");
+			buffer.append(token.getPos());
+			buffer.append(SPACE);
+		}
+		return buffer.toString().trim();
 	}
 
 }

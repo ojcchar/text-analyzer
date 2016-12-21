@@ -17,6 +17,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
+@Deprecated
 public class TextPreprocessor {
 
 	private static StanfordCoreNLP pipeline;
@@ -138,7 +139,7 @@ public class TextPreprocessor {
 		return token.matches("[\\p{P}\\p{S}]") || isParenthesis(token);
 	}
 
-	private static boolean isParenthesis(String token) {
+	public static boolean isParenthesis(String token) {
 		for (String parenthesis : PARENTHESIS) {
 			if (token.contains(parenthesis)) {
 				return true;
