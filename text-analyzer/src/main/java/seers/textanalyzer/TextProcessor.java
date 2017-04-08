@@ -427,15 +427,28 @@ public class TextProcessor {
 		return parsedToken;
 	}
 
-	public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase) {
+	public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase
+			//, boolean processParenthesis
+			) {
 		StringBuffer buffer = new StringBuffer();
 		List<Token> tokens = sentence.getTokens();
 		for (Token token : tokens) {
+			String word = token.getWord();
+
+			// ----------------------------------
+
 			if (lowercase) {
-				buffer.append(token.getWord().toLowerCase());
-			} else {
-				buffer.append(token.getWord());
+				word = word.toLowerCase();
 			}
+
+			// ----------------------------------
+
+			//if (processParenthesis) {
+			//}
+
+			// ----------------------------------
+
+			buffer.append(word);
 			buffer.append("$$");
 			buffer.append(token.getPos());
 			buffer.append(SPACE);
