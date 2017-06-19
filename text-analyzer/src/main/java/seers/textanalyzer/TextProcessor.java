@@ -2,6 +2,7 @@ package seers.textanalyzer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -22,7 +24,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
@@ -44,7 +46,7 @@ public class TextProcessor {
 		defaultPipeline = new StanfordCoreNLP(props);
 		// ---------------------------
 		Properties props2 = new Properties();
-		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, parse");
+		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse");
 		props2.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		fullPipeline = new StanfordCoreNLP(props2);
 	}
@@ -85,7 +87,7 @@ public class TextProcessor {
 		POS_TAGS.put("WRB", "WH");
 	}
 
-	private static String getGeneralPos(String pos) {
+	public static String getGeneralPos(String pos) {
 		String tag = POS_TAGS.get(pos);
 		if (tag != null) {
 			return tag;
@@ -120,7 +122,7 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
@@ -150,7 +152,7 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
@@ -350,7 +352,7 @@ public class TextProcessor {
 	}
 
 	public static List<String> readStopWords(String stopWordsPath) throws IOException {
-		List<String> lines = FileUtils.readLines(new File(stopWordsPath));
+		List<String> lines = FileUtils.readLines(new File(stopWordsPath), Charset.defaultCharset());
 		List<String> stopWords = new ArrayList<>();
 		for (String line : lines) {
 			stopWords.add(line.trim().toLowerCase());
@@ -378,7 +380,7 @@ public class TextProcessor {
 		return buffer.toString().trim();
 	}
 
-	public static List<Sentence> processTextFullPipeline(String text) {
+	public static List<Sentence> processTextFullPipeline(String text, boolean checkForIdentifiers) {
 		Annotation document = new Annotation(text);
 		fullPipeline.annotate(document);
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
@@ -390,15 +392,15 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText = edu.stanford.nlp.ling.Sentence.listToOriginalTextString(tokenList);
+			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
-				Token parsedToken = parseToken(token, false);
+				Token parsedToken = parseToken(token, checkForIdentifiers);
 				parsedSentence.addToken(parsedToken);
 			}
 
-			SemanticGraph dependencies = sentence.get(CollapsedCCProcessedDependenciesAnnotation.class);
+			SemanticGraph dependencies = sentence.get(EnhancedPlusPlusDependenciesAnnotation.class);
 			parsedSentence.setDependencies(dependencies);
 
 			parsedSentences.add(parsedSentence);
@@ -466,6 +468,10 @@ public class TextProcessor {
 			buffer.append(SPACE);
 		}
 		return buffer.toString().trim();
+	}
+
+	public static boolean checkGeneralPos(String tag, String tagToAssert) {
+		return tagToAssert.equals(getGeneralPos(tag));
 	}
 
 }
