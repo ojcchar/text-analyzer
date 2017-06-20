@@ -31,22 +31,6 @@ public class DependenciesUtils {
 		return null;
 	}
 
-	public static Pair<GrammaticalRelation, IndexedWord> getChildFirstRelationStartsWith(SemanticGraph dependencies,
-			IndexedWord idxWord, String... relations) {
-
-		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
-
-		List<String> relList = Arrays.asList(relations);
-		Optional<Pair<GrammaticalRelation, IndexedWord>> child = childPairs.stream()
-				.filter(p -> relList.stream().anyMatch(r -> p.first.getShortName().startsWith(r))).findFirst();
-
-		if (child.isPresent()) {
-			return child.get();
-		}
-
-		return null;
-	}
-
 	public static List<SemanticGraphEdge> findRelationsByTgtRelationAndPos(SemanticGraph dependencies,
 			String tgtRelation, String pos) {
 		GrammaticalRelation relation = GrammaticalRelation.valueOf(Language.UniversalEnglish, tgtRelation);
@@ -69,6 +53,19 @@ public class DependenciesUtils {
 			String tgtRelation, String pos, Set<String> lemmas) {
 		List<SemanticGraphEdge> rels = findRelationsByTgtRelationAndPos(dependencies, tgtRelation, pos);
 		rels = rels.stream().filter(r -> lemmas.contains(r.getTarget().lemma())).collect(Collectors.toList());
+		return rels;
+	}
+
+	public static List<Pair<GrammaticalRelation, IndexedWord>> getChildRelations(SemanticGraph dependencies,
+			IndexedWord idxWord, String... relations) {
+
+		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
+
+		List<String> relList = Arrays.asList(relations);
+		List<Pair<GrammaticalRelation, IndexedWord>> rels = childPairs.stream()
+				.filter(p -> relList.stream().anyMatch(r -> p.first.getShortName().equals(r)))
+				.collect(Collectors.toList());
+
 		return rels;
 	}
 

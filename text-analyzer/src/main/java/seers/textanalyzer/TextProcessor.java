@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
+			String sentenceText = sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
@@ -152,7 +153,7 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
+			String sentenceText = sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
@@ -392,7 +393,7 @@ public class TextProcessor {
 
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 
-			String sentenceText =sentence.get(CoreAnnotations.TextAnnotation.class);
+			String sentenceText = sentence.get(CoreAnnotations.TextAnnotation.class);
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
@@ -430,8 +431,8 @@ public class TextProcessor {
 	}
 
 	public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase
-			//, boolean processParenthesis
-			) {
+	// , boolean processParenthesis
+	) {
 		StringBuffer buffer = new StringBuffer();
 		List<Token> tokens = sentence.getTokens();
 		for (Token token : tokens) {
@@ -445,8 +446,8 @@ public class TextProcessor {
 
 			// ----------------------------------
 
-			//if (processParenthesis) {
-			//}
+			// if (processParenthesis) {
+			// }
 
 			// ----------------------------------
 
@@ -470,8 +471,9 @@ public class TextProcessor {
 		return buffer.toString().trim();
 	}
 
-	public static boolean checkGeneralPos(String tag, String tagToAssert) {
-		return tagToAssert.equals(getGeneralPos(tag));
+	public static boolean checkGeneralPos(String tag, String... tagsToAssert) {
+		String gnrlPos = getGeneralPos(tag);
+		return Arrays.stream(tagsToAssert).anyMatch(t -> t.equals(gnrlPos));
 	}
 
 }
