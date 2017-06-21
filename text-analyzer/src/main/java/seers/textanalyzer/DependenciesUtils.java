@@ -1,6 +1,8 @@
 package seers.textanalyzer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,8 +17,12 @@ import edu.stanford.nlp.util.Pair;
 
 public class DependenciesUtils {
 
-	public static Pair<GrammaticalRelation, IndexedWord> getChildFirstRelation(SemanticGraph dependencies,
+	public static Pair<GrammaticalRelation, IndexedWord> getFirstChildByRelation(SemanticGraph dependencies,
 			IndexedWord idxWord, String... relations) {
+
+		if (idxWord == null) {
+			return null;
+		}
 
 		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
 
@@ -35,10 +41,26 @@ public class DependenciesUtils {
 			String tgtRelation, String pos) {
 		GrammaticalRelation relation = GrammaticalRelation.valueOf(Language.UniversalEnglish, tgtRelation);
 		List<SemanticGraphEdge> rels = dependencies.findAllRelns(relation);
-		if (pos != null) {
+		if (pos != null && pos != null) {
 			rels = rels.stream().filter(a -> a.getTarget().tag().equals(pos)).collect(Collectors.toList());
 		}
 		return rels;
+	}
+
+	public static List<SemanticGraphEdge> findRelationsByTgtRelations(SemanticGraph dependencies,
+			String... tgtRelations) {
+		if (tgtRelations == null) {
+			return null;
+		}
+
+		Set<SemanticGraphEdge> edges = new LinkedHashSet<>();
+
+		for (String rel : tgtRelations) {
+			List<SemanticGraphEdge> edgedRel = findRelationsByTgtRelationAndPos(dependencies, rel, null);
+			edges.addAll(edgedRel);
+		}
+
+		return new ArrayList<>(edges);
 	}
 
 	public static boolean checkForRelationsInPairs(List<Pair<GrammaticalRelation, IndexedWord>> pairs,
@@ -67,6 +89,43 @@ public class DependenciesUtils {
 				.collect(Collectors.toList());
 
 		return rels;
+	}
+
+	public static Pair<GrammaticalRelation, IndexedWord> getFirstChildByRelationAndPos(SemanticGraph dependencies,
+			IndexedWord idxWord, Set<String> relations, Set<String> pos) {
+
+		if (idxWord == null) {
+			return null;
+		}
+
+		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
+
+		Optional<Pair<GrammaticalRelation, IndexedWord>> child = childPairs.stream()
+				.filter(p -> relations.contains(p.first.getShortName()) && pos.contains(p.second.tag())).findFirst();
+
+		if (child.isPresent()) {
+			return child.get();
+		}
+
+		return null;
+	}
+
+	public static List<Pair<GrammaticalRelation, IndexedWord>> getChildrenByRelationPosAndLemma(
+			SemanticGraph dependencies, IndexedWord idxWord, Set<String> relations, Set<String> pos,
+			Set<String> lemmas) {
+
+		if (idxWord == null) {
+			return null;
+		}
+
+		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
+
+		List<Pair<GrammaticalRelation, IndexedWord>> children = childPairs.stream()
+				.filter(p -> relations.contains(p.first.getShortName()) && pos.contains(p.second.tag())
+						&& lemmas.contains(p.second.lemma()))
+				.collect(Collectors.toList());
+
+		return children;
 	}
 
 }

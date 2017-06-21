@@ -48,6 +48,8 @@ public class TextProcessor {
 		// ---------------------------
 		Properties props2 = new Properties();
 		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse");
+//		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse, ner, mention, coref");
+//		props2.setProperty("coref.algorithm", "statistical");
 		props2.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		fullPipeline = new StanfordCoreNLP(props2);
 	}
@@ -403,6 +405,21 @@ public class TextProcessor {
 
 			SemanticGraph dependencies = sentence.get(EnhancedPlusPlusDependenciesAnnotation.class);
 			parsedSentence.setDependencies(dependencies);
+//			
+//			IntTuple a = document.get(CorefDestAnnotation.class);
+//			Integer b = document.get(CorefClusterIdAnnotation.class);
+//			Set<CoreLabel> c = document.get(CorefClusterAnnotation.class);
+//			List<Mention> d = document.get(CorefMentionsAnnotation.class);
+//			
+//
+//			IntTuple e = sentence.get(CorefDestAnnotation.class);
+//			Integer f = sentence.get(CorefClusterIdAnnotation.class);
+//			Set<CoreLabel> g = sentence.get(CorefClusterAnnotation.class);
+//			List<Mention> h = sentence.get(CorefMentionsAnnotation.class);
+//			
+//			Map<Integer, CorefChain> corefChains = document.get(CorefChainAnnotation.class);
+//			
+//			parsedSentence.setCorefChains(corefChains);
 
 			parsedSentences.add(parsedSentence);
 			id++;
