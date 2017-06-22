@@ -128,4 +128,19 @@ public class DependenciesUtils {
 		return children;
 	}
 
+	public static Set<IndexedWord> getParentsbyRelation(SemanticGraph dependencies, IndexedWord vertex,
+			String... relations) {
+
+		List<Pair<GrammaticalRelation, IndexedWord>> pars = dependencies.parentPairs(vertex);
+		List<String> relsSet = Arrays.asList(relations);
+		List<Pair<GrammaticalRelation, IndexedWord>> parsFiltered = pars.stream().filter(p -> relsSet.contains( p.first.getShortName())).collect(Collectors.toList());
+		
+		Set<IndexedWord> parents = new LinkedHashSet<>();
+		for (Pair<GrammaticalRelation, IndexedWord> parPair : parsFiltered) {
+			parents.add(parPair.second);
+		}
+
+		return parents;
+	}
+
 }
