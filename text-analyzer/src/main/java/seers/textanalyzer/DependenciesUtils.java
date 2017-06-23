@@ -2,6 +2,7 @@ package seers.textanalyzer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -36,10 +37,30 @@ public class DependenciesUtils {
 		return null;
 	}
 
+	public static Pair<GrammaticalRelation, IndexedWord> getFirstChildByRelationSpecific(SemanticGraph dependencies,
+			IndexedWord idxWord, HashMap<String, String> relations) {
+
+		if (idxWord == null) {
+			return null;
+		}
+
+		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
+
+		for (Pair<GrammaticalRelation, IndexedWord> p : childPairs) {
+			String specific = relations.get(p.first.getShortName());
+			if (specific != null) {
+				if (p.first.getSpecific() != null && p.first.getSpecific().equals(specific)) {
+					return p;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public static List<SemanticGraphEdge> findRelationsByTgtRelationAndPos(SemanticGraph dependencies,
 			String tgtRelation, String pos) {
-		
-		
+
 		List<SemanticGraphEdge> rels = findAllRellns(dependencies, tgtRelation);
 		if (rels != null && pos != null) {
 			rels = rels.stream().filter(a -> a.getTarget().tag().equals(pos)).collect(Collectors.toList());
@@ -48,23 +69,23 @@ public class DependenciesUtils {
 	}
 
 	private static List<SemanticGraphEdge> findAllRellns(SemanticGraph dependencies, String tgtRelation) {
-		
+
 		Iterable<SemanticGraphEdge> edgeIterable = dependencies.edgeIterable();
-		List<SemanticGraphEdge> edges= new ArrayList<>();
-		
+		List<SemanticGraphEdge> edges = new ArrayList<>();
+
 		for (SemanticGraphEdge edge : edgeIterable) {
 			if (edge.getRelation().getShortName().equals(tgtRelation)) {
 				edges.add(edge);
 			}
 		}
-		
+
 		return edges;
-		
+
 	}
 
 	public static List<SemanticGraphEdge> findRelationsByTgtRelations(SemanticGraph dependencies,
 			String... tgtRelations) {
-		
+
 		if (tgtRelations == null) {
 			return null;
 		}
@@ -149,8 +170,9 @@ public class DependenciesUtils {
 
 		List<Pair<GrammaticalRelation, IndexedWord>> pars = dependencies.parentPairs(vertex);
 		List<String> relsSet = Arrays.asList(relations);
-		List<Pair<GrammaticalRelation, IndexedWord>> parsFiltered = pars.stream().filter(p -> relsSet.contains( p.first.getShortName())).collect(Collectors.toList());
-		
+		List<Pair<GrammaticalRelation, IndexedWord>> parsFiltered = pars.stream()
+				.filter(p -> relsSet.contains(p.first.getShortName())).collect(Collectors.toList());
+
 		Set<IndexedWord> parents = new LinkedHashSet<>();
 		for (Pair<GrammaticalRelation, IndexedWord> parPair : parsFiltered) {
 			parents.add(parPair.second);
