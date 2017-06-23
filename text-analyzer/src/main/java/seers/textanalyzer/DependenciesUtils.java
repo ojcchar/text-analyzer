@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -39,16 +38,33 @@ public class DependenciesUtils {
 
 	public static List<SemanticGraphEdge> findRelationsByTgtRelationAndPos(SemanticGraph dependencies,
 			String tgtRelation, String pos) {
-		GrammaticalRelation relation = GrammaticalRelation.valueOf(Language.UniversalEnglish, tgtRelation);
-		List<SemanticGraphEdge> rels = dependencies.findAllRelns(relation);
-		if (pos != null && pos != null) {
+		
+		
+		List<SemanticGraphEdge> rels = findAllRellns(dependencies, tgtRelation);
+		if (rels != null && pos != null) {
 			rels = rels.stream().filter(a -> a.getTarget().tag().equals(pos)).collect(Collectors.toList());
 		}
 		return rels;
 	}
 
+	private static List<SemanticGraphEdge> findAllRellns(SemanticGraph dependencies, String tgtRelation) {
+		
+		Iterable<SemanticGraphEdge> edgeIterable = dependencies.edgeIterable();
+		List<SemanticGraphEdge> edges= new ArrayList<>();
+		
+		for (SemanticGraphEdge edge : edgeIterable) {
+			if (edge.getRelation().getShortName().equals(tgtRelation)) {
+				edges.add(edge);
+			}
+		}
+		
+		return edges;
+		
+	}
+
 	public static List<SemanticGraphEdge> findRelationsByTgtRelations(SemanticGraph dependencies,
 			String... tgtRelations) {
+		
 		if (tgtRelations == null) {
 			return null;
 		}
