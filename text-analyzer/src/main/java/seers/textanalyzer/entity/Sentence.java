@@ -1,6 +1,8 @@
 package seers.textanalyzer.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -11,6 +13,7 @@ public class Sentence {
 	private List<Token> tokens;
 	private SemanticGraph dependencies;
 	private String text;
+	private HashMap<String, List<Sentence>> quotes;
 
 	public Sentence(String id) {
 		if (id == null) {
@@ -18,11 +21,13 @@ public class Sentence {
 		}
 		this.id = id;
 		tokens = new ArrayList<>();
+		quotes = new LinkedHashMap<>();
 	}
 
 	public Sentence(String id, String text) {
 		this(id);
 		this.text = text;
+		quotes = new LinkedHashMap<>();
 	}
 
 	public Sentence(String id, List<Token> tokens) {
@@ -31,6 +36,7 @@ public class Sentence {
 			throw new NullPointerException();
 		}
 		this.tokens = tokens;
+		quotes = new LinkedHashMap<>();
 	}
 
 	public Sentence(String id, List<Token> tokens, String text) {
@@ -94,6 +100,14 @@ public class Sentence {
 
 	public String getText() {
 		return text;
+	}
+
+	public HashMap<String, List<Sentence>> getQuotes() {
+		return quotes;
+	}
+
+	public void addQuote(String quoteKey, List<Sentence> sentences) {
+		this.quotes.put(quoteKey, sentences);
 	}
 
 }

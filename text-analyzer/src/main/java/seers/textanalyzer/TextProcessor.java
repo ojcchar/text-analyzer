@@ -8,7 +8,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -27,6 +29,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
+import seers.textanalyzer.QuoteProcessor.Quotes;
 import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
 
@@ -48,8 +51,9 @@ public class TextProcessor {
 		// ---------------------------
 		Properties props2 = new Properties();
 		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse");
-//		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse, ner, mention, coref");
-//		props2.setProperty("coref.algorithm", "statistical");
+		// props2.setProperty("annotators", "tokenize, ssplit, pos, lemma,
+		// depparse, ner, mention, coref");
+		// props2.setProperty("coref.algorithm", "statistical");
 		props2.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		fullPipeline = new StanfordCoreNLP(props2);
 	}
@@ -383,6 +387,57 @@ public class TextProcessor {
 		return buffer.toString().trim();
 	}
 
+	public static List<Sentence> processTextFullPipelineAndQuotes(String text, boolean checkForIdentifiers) {
+
+		QuoteProcessor processor = new QuoteProcessor();
+
+		Quotes quotes = processor.processSentence(text);
+
+		List<Sentence> sentences = processSentencesWithQuotes(quotes, checkForIdentifiers);
+
+		return sentences;
+
+	}
+
+	private static List<Sentence> processSentencesWithQuotes(Quotes quotes, boolean checkForIdentifiers) {
+
+		String text = quotes.txt;
+		Annotation document = new Annotation(text);
+		fullPipeline.annotate(document);
+		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+
+		List<Sentence> parsedSentences = new ArrayList<>();
+		Integer id = 0;
+
+		for (CoreMap sentence : sentences) {
+
+			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
+
+			String sentenceText = sentence.get(CoreAnnotations.TextAnnotation.class);
+			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
+
+			for (CoreLabel token : tokenList) {
+				Token parsedToken = parseToken(token, checkForIdentifiers);
+				parsedSentence.addToken(parsedToken);
+			}
+
+			SemanticGraph dependencies = sentence.get(EnhancedPlusPlusDependenciesAnnotation.class);
+			parsedSentence.setDependencies(dependencies);
+
+			Set<Entry<String, Quotes>> quotesMap = quotes.quotesMap.entrySet();
+			for (Entry<String, Quotes> quote : quotesMap) {
+
+				List<Sentence> qSentences = processSentencesWithQuotes(quote.getValue(), checkForIdentifiers);
+				parsedSentence.addQuote(quote.getKey(), qSentences);
+			}
+
+			parsedSentences.add(parsedSentence);
+			id++;
+		}
+
+		return parsedSentences;
+	}
+
 	public static List<Sentence> processTextFullPipeline(String text, boolean checkForIdentifiers) {
 		Annotation document = new Annotation(text);
 		fullPipeline.annotate(document);
@@ -405,21 +460,22 @@ public class TextProcessor {
 
 			SemanticGraph dependencies = sentence.get(EnhancedPlusPlusDependenciesAnnotation.class);
 			parsedSentence.setDependencies(dependencies);
-//			
-//			IntTuple a = document.get(CorefDestAnnotation.class);
-//			Integer b = document.get(CorefClusterIdAnnotation.class);
-//			Set<CoreLabel> c = document.get(CorefClusterAnnotation.class);
-//			List<Mention> d = document.get(CorefMentionsAnnotation.class);
-//			
-//
-//			IntTuple e = sentence.get(CorefDestAnnotation.class);
-//			Integer f = sentence.get(CorefClusterIdAnnotation.class);
-//			Set<CoreLabel> g = sentence.get(CorefClusterAnnotation.class);
-//			List<Mention> h = sentence.get(CorefMentionsAnnotation.class);
-//			
-//			Map<Integer, CorefChain> corefChains = document.get(CorefChainAnnotation.class);
-//			
-//			parsedSentence.setCorefChains(corefChains);
+			//
+			// IntTuple a = document.get(CorefDestAnnotation.class);
+			// Integer b = document.get(CorefClusterIdAnnotation.class);
+			// Set<CoreLabel> c = document.get(CorefClusterAnnotation.class);
+			// List<Mention> d = document.get(CorefMentionsAnnotation.class);
+			//
+			//
+			// IntTuple e = sentence.get(CorefDestAnnotation.class);
+			// Integer f = sentence.get(CorefClusterIdAnnotation.class);
+			// Set<CoreLabel> g = sentence.get(CorefClusterAnnotation.class);
+			// List<Mention> h = sentence.get(CorefMentionsAnnotation.class);
+			//
+			// Map<Integer, CorefChain> corefChains =
+			// document.get(CorefChainAnnotation.class);
+			//
+			// parsedSentence.setCorefChains(corefChains);
 
 			parsedSentences.add(parsedSentence);
 			id++;

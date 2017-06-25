@@ -165,7 +165,7 @@ public class DependenciesUtils {
 		return children;
 	}
 
-	public static Set<IndexedWord> getParentsbyRelation(SemanticGraph dependencies, IndexedWord vertex,
+	public static List<IndexedWord> getParentsbyRelation(SemanticGraph dependencies, IndexedWord vertex,
 			String... relations) {
 
 		List<Pair<GrammaticalRelation, IndexedWord>> pars = dependencies.parentPairs(vertex);
@@ -178,7 +178,7 @@ public class DependenciesUtils {
 			parents.add(parPair.second);
 		}
 
-		return parents;
+		return new ArrayList<>(parents);
 	}
 
 }

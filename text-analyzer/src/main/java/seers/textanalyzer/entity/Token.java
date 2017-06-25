@@ -42,7 +42,7 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return "(w=" + word + ", gp=" + generalPos + ", p=" + pos + ", l=" + lemma + "]";
+		return "(w=" + word + ", gp=" + generalPos + ", p=" + pos + ", l=" + lemma + ")";
 	}
 
 	public String getGeneralPos() {
