@@ -1,7 +1,10 @@
 package seers.textanalyzer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -9,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class QuoteProcessor {
 
-	private final String QUOTE_PREFIX = "QUT_";
+	public static final String QUOTE_PREFIX = "QUT_";
 	private int quotesIdx;
 
 	public QuoteProcessor() {
@@ -33,7 +36,7 @@ public class QuoteProcessor {
 				txtToProcess = originalTxt.substring(1, originalTxt.length() - 1);
 			}
 
-			String[] valuesInQuotes = StringUtils.substringsBetween(txtToProcess, quoteMark, quoteMark);
+			List<String> valuesInQuotes = getValues(quoteMark, txtToProcess);
 
 			if (valuesInQuotes == null) {
 				continue;
@@ -54,6 +57,51 @@ public class QuoteProcessor {
 		Quotes quotes = new Quotes(originalTxt, processedText, quotesMap);
 
 		return quotes;
+	}
+
+	private List<String> getValues(String quoteMark, String txtToProcess) {
+
+		String[] tokens = txtToProcess.split(" ");
+
+		List<String> values = new ArrayList<>();
+		for (int i = 0; i < tokens.length;) {
+			String token = tokens[i];
+
+			if (token.startsWith(quoteMark)) {
+				for (int j = i; j < tokens.length; j++) {
+					String token2 = tokens[j];
+
+					if (token2.endsWith(quoteMark) || token2.matches(".+\\" + quoteMark + "\\p{Punct}+$")) {
+						String value = getSubstring(tokens, i, j + 1, quoteMark);
+						if (value!=null) {
+							values.add(value);
+						}
+						i = j;
+						break;
+					}
+
+				}
+			}
+
+			i++;
+
+		}
+
+		return values;
+	}
+
+	private String getSubstring(String[] tokens, int ini, int end, String quoteMark) {
+		String[] subArray = Arrays.copyOfRange(tokens, ini, end);
+		String subString = StringUtils.join(subArray, " ").trim();
+		// subString = subString.replaceFirst("\\" + quoteMark + "\\p{Punct}+$",
+		// "");
+		// subString = subString.replace(quoteMark, "");
+
+		String[] subs = StringUtils.substringsBetween(subString, quoteMark, quoteMark);
+		if (subs != null) {
+			return subs[0];
+		}
+		return null;
 	}
 
 	public class Quotes {
