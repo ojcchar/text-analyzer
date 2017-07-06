@@ -42,13 +42,11 @@ public class TextProcessor {
 	private static StanfordCoreNLP defaultPipeline;
 	private static StanfordCoreNLP fullPipeline;
 
-	static {
-		// ---------------------------
-		Properties props = new Properties();
-		props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
-		props.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
-		defaultPipeline = new StanfordCoreNLP(props);
-		// ---------------------------
+	private synchronized static void initFullPipeline() {
+
+		if (fullPipeline != null) {
+			return;
+		}
 		Properties props2 = new Properties();
 		props2.setProperty("annotators", "tokenize, ssplit, pos, lemma, depparse");
 		// props2.setProperty("annotators", "tokenize, ssplit, pos, lemma,
@@ -56,6 +54,18 @@ public class TextProcessor {
 		// props2.setProperty("coref.algorithm", "statistical");
 		props2.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
 		fullPipeline = new StanfordCoreNLP(props2);
+	}
+
+	private synchronized static void initDefaultPipeline() {
+
+		if (defaultPipeline != null) {
+			return;
+		}
+
+		Properties props = new Properties();
+		props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
+		props.setProperty("tokenize.options", "untokenizable=noneKeep,invertible=true");
+		defaultPipeline = new StanfordCoreNLP(props);
 	}
 
 	public static final String[] PARENTHESIS = { "-LCB-", "-RCB-", "-LRB-", "-RRB-", "-LSB-", "-RSB-" };
@@ -116,6 +126,7 @@ public class TextProcessor {
 	}
 
 	public static List<Sentence> processText(String text, boolean checkForIdentifiers) {
+		initDefaultPipeline();
 
 		Annotation document = new Annotation(text);
 		defaultPipeline.annotate(document);
@@ -147,6 +158,7 @@ public class TextProcessor {
 	}
 
 	public static List<Sentence> processText(String text, List<String> stopWords) {
+		initDefaultPipeline();
 
 		Annotation document = new Annotation(text);
 		defaultPipeline.annotate(document);
@@ -400,6 +412,7 @@ public class TextProcessor {
 	}
 
 	private static List<Sentence> processSentencesWithQuotes(Quotes quotes, boolean checkForIdentifiers) {
+		initFullPipeline();
 
 		String text = quotes.txt;
 		Annotation document = new Annotation(text);
@@ -439,6 +452,8 @@ public class TextProcessor {
 	}
 
 	public static List<Sentence> processTextFullPipeline(String text, boolean checkForIdentifiers) {
+		initFullPipeline();
+
 		Annotation document = new Annotation(text);
 		fullPipeline.annotate(document);
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
