@@ -19,7 +19,7 @@ public class Sentence {
 		if (id == null) {
 			throw new NullPointerException();
 		}
-		this.id = id;
+		this.setId(id);
 		tokens = new ArrayList<>();
 		quotes = new LinkedHashMap<>();
 	}
@@ -60,7 +60,7 @@ public class Sentence {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
 		return result;
 	}
 
@@ -73,10 +73,10 @@ public class Sentence {
 		if (getClass() != obj.getClass())
 			return false;
 		Sentence other = (Sentence) obj;
-		if (id == null) {
-			if (other.id != null)
+		if (getId() == null) {
+			if (other.getId() != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!getId().equals(other.getId()))
 			return false;
 		return true;
 	}
@@ -87,7 +87,7 @@ public class Sentence {
 
 	@Override
 	public String toString() {
-		return "s [id=" + id + ", tk=" + tokens + "]";
+		return "s [id=" + getId() + ", tk=" + tokens + "]";
 	}
 
 	public SemanticGraph getDependencies() {
@@ -108,6 +108,10 @@ public class Sentence {
 
 	public void addQuote(String quoteKey, List<Sentence> sentences) {
 		this.quotes.put(quoteKey, sentences);
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }
