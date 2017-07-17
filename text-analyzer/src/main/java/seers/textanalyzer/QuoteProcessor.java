@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class QuoteProcessor {
 
-	public static final String QUOTE_PREFIX = "QUT_";
+	public static final String QUOTE_PREFIX = "QUT";
 	private int quotesIdx;
 
 	public QuoteProcessor() {

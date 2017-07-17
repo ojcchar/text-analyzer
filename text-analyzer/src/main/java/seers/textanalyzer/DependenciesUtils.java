@@ -25,6 +25,8 @@ public class DependenciesUtils {
 		}
 
 		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
+		
+		childPairs.sort( (c1,c2) -> Integer.compare(c1.second.index(), c2.second.index()));
 
 		List<String> relList = Arrays.asList(relations);
 		Optional<Pair<GrammaticalRelation, IndexedWord>> child = childPairs.stream()
@@ -117,6 +119,10 @@ public class DependenciesUtils {
 
 	public static List<Pair<GrammaticalRelation, IndexedWord>> getChildRelations(SemanticGraph dependencies,
 			IndexedWord idxWord, String... relations) {
+		
+		if (idxWord==null) {
+			return new ArrayList<>();
+		}
 
 		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
 
