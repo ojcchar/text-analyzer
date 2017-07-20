@@ -15,7 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
@@ -29,6 +31,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
 import edu.stanford.nlp.util.CoreMap;
+import seers.appcore.utils.ExceptionUtils;
 import seers.textanalyzer.QuoteProcessor.Quotes;
 import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
@@ -157,7 +160,27 @@ public class TextProcessor {
 
 	}
 
-	public static List<Sentence> processText(String text, List<String> stopWords) {
+	public static List<Sentence> preprocessText(String text, List<String> stopWords) {
+		String options = PreprocessingOptionsParser.getDefaultOptionsNoCamelCase();
+		return preprocessText(text, stopWords, options);
+	}
+	
+	public static List<Sentence> preprocessText(String text, List<String> stopWords, String[] preprocessingOptions) {
+		String options = PreprocessingOptionsParser.buildStringOptions(preprocessingOptions);
+		return preprocessText(text, stopWords, options);
+	}
+
+	public static List<Sentence> preprocessText(String text, List<String> stopWords, String preprocessingOptions) {
+
+		PreprocessingOptionsParser parser;
+		try {
+			parser = new PreprocessingOptionsParser(preprocessingOptions);
+		} catch (ParseException e) {
+			throw ExceptionUtils.getRuntimeException(e);
+		}
+
+		// -------------------------
+
 		initDefaultPipeline();
 
 		Annotation document = new Annotation(text);
@@ -175,38 +198,12 @@ public class TextProcessor {
 			Sentence parsedSentence = new Sentence(id.toString(), sentenceText);
 
 			for (CoreLabel token : tokenList) {
-				String word = token.get(TextAnnotation.class);
-				String lemma = token.get(LemmaAnnotation.class).toLowerCase();
-				String pos = token.get(PartOfSpeechAnnotation.class);
 
-				if (isPunctuation(lemma)) {
-					continue;
+				if (parser.splitCamelCase()) {
+					splitCamelCaseAndAddTokens(parser, stopWords, parsedSentence, token);
+				} else {
+					addToken(parser, stopWords, parsedSentence, token);
 				}
-
-				if (matchesPOS(pos, "LS")) {
-					continue;
-				}
-
-				// if (isInteger(lemma)) {
-				// continue;
-				// }
-				if (isShortTerm(lemma, pos, 2)) {
-					continue;
-				}
-
-				if (containsSpecialChars(lemma, pos)) {
-					continue;
-				}
-
-				if (stopWords != null && stopWords.size() > 0 && isStopWord(stopWords, lemma, pos)) {
-					continue;
-				}
-
-				String generalPos = getGeneralPos(pos);
-				String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
-
-				Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
-				parsedSentence.addToken(parsedToken);
 			}
 
 			if (parsedSentence.isEmpty()) {
@@ -221,11 +218,70 @@ public class TextProcessor {
 
 	}
 
+	private static void splitCamelCaseAndAddTokens(PreprocessingOptionsParser parser, List<String> stopWords,
+			Sentence parsedSentence, CoreLabel token) {
+	
+		String word = token.get(TextAnnotation.class);
+		String[] ccTokens = StringUtils.splitByCharacterTypeCamelCase(word);
+		String tokenCC = StringUtils.join(ccTokens, ' ');
+
+		Annotation tokenAnnot = new Annotation(tokenCC);
+		defaultPipeline.annotate(tokenAnnot);
+		
+		List<CoreMap> sentences = tokenAnnot.get(SentencesAnnotation.class);
+		for (CoreMap sentence : sentences) {
+			
+			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
+			for (CoreLabel newToken : tokenList) {
+				addToken(parser, stopWords, parsedSentence, newToken);
+			}
+		}
+	}
+
+	private static void addToken(PreprocessingOptionsParser parser, List<String> stopWords, Sentence parsedSentence,
+			CoreLabel token) {
+		String word = token.get(TextAnnotation.class);
+		String lemma = token.get(LemmaAnnotation.class).toLowerCase();
+		String pos = token.get(PartOfSpeechAnnotation.class);
+
+		if (parser.removePunctuation()) {
+			if (isPunctuation(lemma)) {
+				return;
+			}
+
+			if (matchesPOS(pos, "LS")) {
+				return;
+			}
+		}
+
+		if (parser.removeNumbers() && isNumber(lemma)) {
+			return;
+		}
+
+		if (parser.removeShortTokens() && isShortTerm(lemma, pos, parser.getTokenMinLength())) {
+			return;
+		}
+
+		if (parser.removeSpecialCharTokens() && containsSpecialChars(lemma, pos)) {
+			return;
+		}
+
+		if (stopWords != null && stopWords.size() > 0 && isStopWord(stopWords, lemma, pos)) {
+			return;
+		}
+
+		String generalPos = getGeneralPos(pos);
+		String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
+
+		Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
+		parsedSentence.addToken(parsedToken);
+	}
+
 	public static boolean isShortTerm(String lemma, String pos, int length) {
 		if (matchesPOS(pos, "cd")) {
 			return false;
 		}
-		return (lemma.length() <= length);
+		return (lemma.length() < length);
 	}
 
 	public static boolean matchesPOS(String pos, String posToMatch) {
@@ -292,8 +348,19 @@ public class TextProcessor {
 		return b;
 	}
 
-	public static boolean isInteger(String token) {
-		return token.matches("\\d+");
+	public static boolean isNumber(String token) {
+		boolean isInt = token.matches("\\d+((\\h|\\s)+\\d+)+");
+		if (isInt) {
+			return true;
+		}
+
+		try {
+			Double.valueOf(token);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+
 	}
 
 	public static boolean isPunctuation(String token) {
