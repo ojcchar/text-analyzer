@@ -164,12 +164,20 @@ public class TextProcessor {
 		String options = PreprocessingOptionsParser.getDefaultOptionsNoCamelCase();
 		return preprocessText(text, stopWords, options);
 	}
-	
+
 	public static List<Sentence> preprocessText(String text, List<String> stopWords, String[] preprocessingOptions) {
 		String options = PreprocessingOptionsParser.buildStringOptions(preprocessingOptions);
 		return preprocessText(text, stopWords, options);
 	}
 
+	/**
+	 * Tokenization + lemmatization + stemming by default
+	 * 
+	 * @param text
+	 * @param stopWords
+	 * @param preprocessingOptions
+	 * @return
+	 */
 	public static List<Sentence> preprocessText(String text, List<String> stopWords, String preprocessingOptions) {
 
 		PreprocessingOptionsParser parser;
@@ -220,17 +228,17 @@ public class TextProcessor {
 
 	private static void splitCamelCaseAndAddTokens(PreprocessingOptionsParser parser, List<String> stopWords,
 			Sentence parsedSentence, CoreLabel token) {
-	
+
 		String word = token.get(TextAnnotation.class);
 		String[] ccTokens = StringUtils.splitByCharacterTypeCamelCase(word);
 		String tokenCC = StringUtils.join(ccTokens, ' ');
 
 		Annotation tokenAnnot = new Annotation(tokenCC);
 		defaultPipeline.annotate(tokenAnnot);
-		
+
 		List<CoreMap> sentences = tokenAnnot.get(SentencesAnnotation.class);
 		for (CoreMap sentence : sentences) {
-			
+
 			List<CoreLabel> tokenList = sentence.get(TokensAnnotation.class);
 			for (CoreLabel newToken : tokenList) {
 				addToken(parser, stopWords, parsedSentence, newToken);
@@ -447,18 +455,17 @@ public class TextProcessor {
 	}
 
 	public static String getStringFromLemmas(Sentence sentence) {
-		StringBuffer buffer = new StringBuffer();
 		List<Token> tokens = sentence.getTokens();
-		for (Token token : tokens) {
-			buffer.append(token.getLemma());
-			buffer.append(SPACE);
-		}
-		return buffer.toString().trim();
+		return getStringFromLemmas(tokens);
 	}
 
 	public static String getStringFromTerms(Sentence sentence) {
-		StringBuffer buffer = new StringBuffer();
 		List<Token> tokens = sentence.getTokens();
+		return getStringFromTerms(tokens);
+	}
+
+	public static String getStringFromTerms(List<Token> tokens) {
+		StringBuffer buffer = new StringBuffer();
 		for (Token token : tokens) {
 			buffer.append(token.getWord());
 			buffer.append(SPACE);
@@ -629,6 +636,15 @@ public class TextProcessor {
 	public static boolean checkGeneralPos(String tag, String... tagsToAssert) {
 		String gnrlPos = getGeneralPos(tag);
 		return Arrays.stream(tagsToAssert).anyMatch(t -> t.equals(gnrlPos));
+	}
+
+	public static String getStringFromLemmas(List<Token> tokens) {
+		StringBuffer buffer = new StringBuffer();
+		for (Token token : tokens) {
+			buffer.append(token.getLemma());
+			buffer.append(SPACE);
+		}
+		return buffer.toString().trim();
 	}
 
 }

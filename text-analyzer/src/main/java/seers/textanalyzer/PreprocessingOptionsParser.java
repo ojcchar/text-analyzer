@@ -107,7 +107,7 @@ public class PreprocessingOptionsParser {
 		return builder.toString().trim();
 	}
 
-	public static String buildStringOptions(String[] options) {
+	public static String buildStringOptions(String... options) {
 		StringBuilder builder = new StringBuilder();
 
 		for (String opt : options) {
