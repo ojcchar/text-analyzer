@@ -230,8 +230,7 @@ public class TextProcessor {
 			Sentence parsedSentence, CoreLabel token) {
 
 		String word = token.get(TextAnnotation.class);
-		String[] ccTokens = StringUtils.splitByCharacterTypeCamelCase(word);
-		String tokenCC = StringUtils.join(ccTokens, ' ');
+		String tokenCC = splitByCharacterTypeCamelCase(word);
 
 		Annotation tokenAnnot = new Annotation(tokenCC);
 		defaultPipeline.annotate(tokenAnnot);
@@ -244,6 +243,12 @@ public class TextProcessor {
 				addToken(parser, stopWords, parsedSentence, newToken);
 			}
 		}
+	}
+
+	public static String splitByCharacterTypeCamelCase(String word) {
+		String[] ccTokens = StringUtils.splitByCharacterTypeCamelCase(word);
+		String tokenCC = StringUtils.join(ccTokens, ' ');
+		return tokenCC;
 	}
 
 	private static void addToken(PreprocessingOptionsParser parser, List<String> stopWords, Sentence parsedSentence,
@@ -270,7 +275,9 @@ public class TextProcessor {
 			return;
 		}
 
-		if (parser.removeSpecialCharTokens() && containsSpecialChars(lemma, pos)) {
+		if (parser.removeSpecialCharTokens() && checkSpecialChars(lemma)
+				//containsSpecialChars(lemma, pos)
+				) {
 			return;
 		}
 
