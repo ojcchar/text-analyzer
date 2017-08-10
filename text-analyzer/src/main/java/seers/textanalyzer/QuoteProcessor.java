@@ -157,4 +157,8 @@ public class QuoteProcessor {
 
 	}
 
+	public static boolean isQuoteToken(String word) {
+		return word.matches(QUOTE_PREFIX+"\\d+");
+	}
+
 }

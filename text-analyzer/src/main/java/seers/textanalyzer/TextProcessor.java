@@ -275,7 +275,7 @@ public class TextProcessor {
 			return;
 		}
 
-		if (parser.removeSpecialCharTokens() && checkSpecialChars(lemma)
+		if (parser.removeSpecialCharTokens() && isSpecialChar(lemma)
 				//containsSpecialChars(lemma, pos)
 				) {
 			return;
@@ -325,7 +325,7 @@ public class TextProcessor {
 		if (split.length > 1) {
 
 			for (String s : split) {
-				if (checkSpecialChars(s)) {
+				if (isSpecialChar(s)) {
 					return true;
 				}
 			}
@@ -341,7 +341,7 @@ public class TextProcessor {
 		if (split.length > 1) {
 
 			for (String s : split) {
-				if (checkSpecialChars(s)) {
+				if (isSpecialChar(s)) {
 					return true;
 				}
 			}
@@ -353,11 +353,11 @@ public class TextProcessor {
 			return false;
 		}
 
-		boolean b = checkSpecialChars(str);
+		boolean b = isSpecialChar(str);
 		return b;
 	}
 
-	public static boolean checkSpecialChars(String str) {
+	public static boolean isSpecialChar(String str) {
 		String[] split = str.split("[^a-zA-Z0-9]");
 		boolean b = split.length != 1;
 		return b;
