@@ -106,7 +106,8 @@ public class TextProcessorTest {
 		String text = "process_text camelCase NewCamelCase This is a number: 23234.2342 4544 456454,121";
 
 		String options = "-" + PreprocessingOptionsParser.NUMBERS_REMOVAL + " -"
-				+ PreprocessingOptionsParser.CAMEL_CASE_SPLITTING + " -" + PreprocessingOptionsParser.SPECIAL_CHARS_REMOVAL;
+				+ PreprocessingOptionsParser.CAMEL_CASE_SPLITTING + " -"
+				+ PreprocessingOptionsParser.SPECIAL_CHARS_REMOVAL;
 		List<Sentence> sentences = TextProcessor.preprocessText(text, null, options);
 
 		List<Token> tokens = new ArrayList<>();
@@ -123,4 +124,21 @@ public class TextProcessorTest {
 
 	}
 
+	@Test
+	public void testPreprocessText5() {
+		String text = "When I create an entry for a purchase, the autocomplete list shows up";
+
+		List<Sentence> sentences = TextProcessor.processTextFullPipeline(text, false);
+
+		System.out.println(sentences.get(0).getDependencies());
+
+		// --------------------
+
+		text = "the autocomplete list shows up, when I create an entry for a purchase";
+
+		sentences = TextProcessor.processTextFullPipeline(text, false);
+
+		System.out.println(sentences.get(0).getDependencies());
+
+	}
 }
