@@ -1,12 +1,6 @@
 package seers.textanalyzer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.IndexedWord;
@@ -40,7 +34,7 @@ public class DependenciesUtils {
 	}
 
 	public static Pair<GrammaticalRelation, IndexedWord> getFirstChildByRelationSpecific(SemanticGraph dependencies,
-			IndexedWord idxWord, HashMap<String, String> relations) {
+			IndexedWord idxWord, Map<String, List<String>> relations) {
 
 		if (idxWord == null) {
 			return null;
@@ -49,9 +43,9 @@ public class DependenciesUtils {
 		List<Pair<GrammaticalRelation, IndexedWord>> childPairs = dependencies.childPairs(idxWord);
 
 		for (Pair<GrammaticalRelation, IndexedWord> p : childPairs) {
-			String specific = relations.get(p.first.getShortName());
-			if (specific != null) {
-				if (p.first.getSpecific() != null && p.first.getSpecific().equals(specific)) {
+			List<String> specifics = relations.get(p.first.getShortName());
+			if (specifics != null) {
+				if (p.first.getSpecific() != null && specifics.contains( p.first.getSpecific())) {
 					return p;
 				}
 			}
