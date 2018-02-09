@@ -1,5 +1,7 @@
 package seers.textanalyzer.entity;
 
+import java.util.Objects;
+
 public class Token {
 
 	private String word;
@@ -61,4 +63,17 @@ public class Token {
 		this.stem = stem;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Token token = (Token) o;
+		return Objects.equals(lemma, token.lemma);
+	}
+
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(lemma);
+	}
 }
