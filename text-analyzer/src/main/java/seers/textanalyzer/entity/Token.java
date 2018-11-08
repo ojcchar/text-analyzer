@@ -4,19 +4,32 @@ import java.util.Objects;
 
 public class Token {
 
-	private String word;
+    private String word;
 	private String generalPos;
 	private String pos;
 	private String lemma;
 	private String stem;
+    private final int beginPosition;
+    private final int endPosition;
 
-	public Token(String word, String generalPos, String pos, String lemma, String stem) {
+    public Token(String word, String generalPos, String pos, String lemma, String stem,
+                 int beginPosition, int endPosition) {
 		this.word = word;
 		this.generalPos = generalPos;
 		this.pos = pos;
 		this.lemma = lemma;
 		this.stem = stem;
+		this.beginPosition = beginPosition;
+		this.endPosition = endPosition;
 	}
+
+    public int getBeginPosition() {
+        return beginPosition;
+    }
+
+    public int getEndPosition() {
+        return endPosition;
+    }
 
 	public String getWord() {
 		return word;
@@ -44,7 +57,8 @@ public class Token {
 
 	@Override
 	public String toString() {
-		return "(w=" + word + ", gp=" + generalPos + ", p=" + pos + ", l=" + lemma + ")";
+		return "(w=" + word + ", gp=" + generalPos + ", p=" + pos + ", l=" + lemma + ", b=" + beginPosition +
+                ", e=" + endPosition +")";
 	}
 
 	public String getGeneralPos() {

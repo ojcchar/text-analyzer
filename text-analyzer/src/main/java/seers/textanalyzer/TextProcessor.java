@@ -290,7 +290,10 @@ public class TextProcessor {
         String generalPos = getGeneralPos(pos);
         String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
 
-        Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
+        final int beginPosition = token.beginPosition();
+        final int endPosition = token.endPosition();
+
+        Token parsedToken = new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition);
         parsedSentence.addToken(parsedToken);
     }
 
@@ -596,9 +599,10 @@ public class TextProcessor {
 
         String generalPos = getGeneralPos(pos);
         String stem = GeneralStemmer.stemmingPorter(word).toLowerCase();
+        final int beginPosition = token.beginPosition();
+        final int endPosition = token.endPosition();
 
-        Token parsedToken = new Token(word, generalPos, pos, lemma, stem);
-        return parsedToken;
+        return new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition);
     }
 
     public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase
