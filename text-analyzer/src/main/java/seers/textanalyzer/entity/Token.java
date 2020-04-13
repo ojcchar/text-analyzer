@@ -9,11 +9,12 @@ public class Token {
 	private String pos;
 	private String lemma;
 	private String stem;
+	private final int index; //stanford corenlp index in the semantic graph
     private final int beginPosition;
     private final int endPosition;
 
     public Token(String word, String generalPos, String pos, String lemma, String stem,
-                 int beginPosition, int endPosition) {
+                 int beginPosition, int endPosition, int index) {
 		this.word = word;
 		this.generalPos = generalPos;
 		this.pos = pos;
@@ -21,9 +22,19 @@ public class Token {
 		this.stem = stem;
 		this.beginPosition = beginPosition;
 		this.endPosition = endPosition;
+		this.index = index;
 	}
 
-    public int getBeginPosition() {
+	public Token(String word, String generalPos, String pos, String lemma, String stem,
+				 int beginPosition, int endPosition){
+    	this(word, generalPos, pos, lemma, stem, beginPosition, endPosition, -1);
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public int getBeginPosition() {
         return beginPosition;
     }
 

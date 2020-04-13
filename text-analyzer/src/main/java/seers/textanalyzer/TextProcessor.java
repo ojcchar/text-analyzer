@@ -293,7 +293,7 @@ public class TextProcessor {
         final int beginPosition = token.beginPosition();
         final int endPosition = token.endPosition();
 
-        Token parsedToken = new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition);
+        Token parsedToken = new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition, token.index());
         parsedSentence.addToken(parsedToken);
     }
 
@@ -602,7 +602,7 @@ public class TextProcessor {
         final int beginPosition = token.beginPosition();
         final int endPosition = token.endPosition();
 
-        return new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition);
+        return new Token(word, generalPos, pos, lemma, stem, beginPosition, endPosition, token.index());
     }
 
     public static String getStringFromTermsAndPos(Sentence sentence, boolean lowercase
