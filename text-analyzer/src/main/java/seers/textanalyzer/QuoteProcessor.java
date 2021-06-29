@@ -68,7 +68,10 @@ public class QuoteProcessor {
 			String token = tokens[i];
 
 			if (token.startsWith(quoteMark)) {
-				for (int j = i; j < tokens.length; j++) {
+				int j = i;
+				if (token.equals(quoteMark))
+					j = i + 1;
+				for (; j < tokens.length; j++) {
 					String token2 = tokens[j];
 
 					if (token2.endsWith(quoteMark) || token2.matches(".+\\" + quoteMark + "\\p{Punct}+$")) {
