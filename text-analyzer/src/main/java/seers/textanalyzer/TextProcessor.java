@@ -115,7 +115,7 @@ public class TextProcessor {
     }
 
     /**
-     * This method does not check for identifies (i.e., identifiers maybe not be
+     * This method does not check for identifiers (i.e., identifiers maybe not be
      * parsed as NN).
      * <p>
      * Method created for compatibility reasons.

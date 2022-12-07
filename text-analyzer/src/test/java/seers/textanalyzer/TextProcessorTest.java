@@ -1,6 +1,8 @@
 package seers.textanalyzer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,22 @@ import seers.textanalyzer.entity.Sentence;
 import seers.textanalyzer.entity.Token;
 
 public class TextProcessorTest {
+
+	
+	@Test
+	public void testProcessText0() {
+
+		String text = "This is a method: Class.methodToTest(\"test\")";
+		List<Sentence> sentences = TextProcessor.processTextFullPipeline(text, false);
+
+		assertNotNull(sentences);
+		assertTrue(!sentences.isEmpty());
+
+		for (Sentence sentence : sentences) {
+			System.out.println(sentence);
+			System.out.println(sentence.getDependencies());
+		}
+	}
 
 	@Test
 	public void testProcessTextStringBoolean() {
@@ -26,7 +44,7 @@ public class TextProcessorTest {
 				sentences.get(1).getText());
 	}
 
-	// @Test
+	@Test
 	public void testProcessTextFullPipelineAndQuotes() {
 		String text = "App crashes with the following stack traces when \"Maximum Score\" is the character \"-\" or is a big number.";
 
@@ -76,7 +94,7 @@ public class TextProcessorTest {
 		System.out.println(text);
 		System.out.println(tokensString);
 
-		assertEquals(10, tokens.size());
+		assertEquals(14, tokens.size());
 
 	}
 
